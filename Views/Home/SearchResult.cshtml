@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Http;
+@{
+    ViewData["Title"] = "Result Page";
+    string fullname = Context.Session.GetString("fullname");
+    string result = Context.Session.GetString("result");
+}
+
+<div class="text-center">
+    <h1 class="display-4">@fullname's results</h1>
+    <h1 class="display-4">@result</h1>
+</div>
