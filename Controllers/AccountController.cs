@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using DataFinder.Filter;
 using DataFinder.Models;
@@ -87,7 +89,7 @@ namespace DataFinder.Controllers
         }
         public IActionResult Login(string email,string pass)
         {
-            var user = _context.User.FirstOrDefault(w => w.Email.Equals(email) && w.Password.Equals(pass));
+            var user = _context.User.FirstOrDefault(w => w.Email.Equals(email) && w.Password.Equals(DecodePassword(pass)));
             if (user != null)
             {
                 HttpContext.Session.SetInt32("userId", user.Id);
@@ -95,6 +97,23 @@ namespace DataFinder.Controllers
                 return Redirect("/Home/Index");
             }
             return Redirect("Index");
+        }
+
+        public static string PasswordHashCreate(string password) 
+        {
+            SHA1 sha = new SHA1CryptoServiceProvider();
+             string hashPassword = Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(password)));
+            return hashPassword;
+        }
+        public static string DecodePassword(string password)
+        {
+            SHA1 hash = SHA1.Create();
+            ASCIIEncoding encoder = new ASCIIEncoding();
+            byte[] combined = encoder.GetBytes(password);
+            hash.ComputeHash(combined);
+            string decodePassword = Convert.ToBase64String(hash.Hash);
+
+            return decodePassword;
         }
         public IActionResult Logout()
         {
@@ -111,6 +130,7 @@ namespace DataFinder.Controllers
         }
         public async Task<IActionResult> Register(User model)
         {
+            model.Password = PasswordHashCreate(model.Password);
             await _context.AddAsync(model);
             await _context.SaveChangesAsync();
 

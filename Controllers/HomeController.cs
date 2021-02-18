@@ -45,7 +45,7 @@ namespace DataFinder.Controllers
         }
         public IActionResult Report()
         {
-            List<UrlSearch> search = (from UrlSearch in _context.UrlSearch.Take(100) where UrlSearch.UserId==(int) HttpContext.Session.GetInt32("userId")
+            List<UrlSearch> search = (from UrlSearch in _context.UrlSearch
                                       select UrlSearch).ToList();
             return View(search);
         }
